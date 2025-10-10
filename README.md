@@ -12,7 +12,7 @@ A powerful Telegram bot that integrates with Notion to track competition opportu
 
 ## 🚀 Quick Deploy to Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Ask-Cher/hyphn-pa)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/lleyi0606/hyphn-pa)
 
 ## 📋 Commands
 
@@ -36,7 +36,7 @@ NODE_ENV=production
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Ask-Cher/hyphn-pa.git
+   git clone https://github.com/lleyi0606/hyphn-pa.git
    cd hyphn-pa
    ```
 
@@ -176,7 +176,7 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/Ask-Cher/hyphn-pa/issues)
+- **Issues**: [GitHub Issues](https://github.com/lleyi0606/hyphn-pa/issues)
 - **Documentation**: This README and inline code comments
 - **Community**: GitHub Discussions
 
