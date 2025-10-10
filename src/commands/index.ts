@@ -52,7 +52,7 @@ export const dashboard = () => async (ctx: Context) => {
     
     return ctx.reply(dashboardMessage, { 
       parse_mode: 'Markdown',
-      disable_web_page_preview: true 
+      link_preview_options: { is_disabled: true }
     });
   } catch (error) {
     console.error('Error generating dashboard:', error);
@@ -83,7 +83,7 @@ export const deadlines = () => async (ctx: Context) => {
     
     return ctx.reply(message, { 
       parse_mode: 'Markdown',
-      disable_web_page_preview: true 
+      link_preview_options: { is_disabled: true }
     });
   } catch (error) {
     console.error('Error checking deadlines:', error);
@@ -114,7 +114,7 @@ export const priority = () => async (ctx: Context) => {
     
     return ctx.reply(message, { 
       parse_mode: 'Markdown',
-      disable_web_page_preview: true 
+      link_preview_options: { is_disabled: true }
     });
   } catch (error) {
     console.error('Error checking priority competitions:', error);
