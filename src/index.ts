@@ -1,7 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { development, production } from './core';
-import { start, help, dashboard, deadlines, priority, whatToDo } from './commands';
+import { start, help, dashboard, deadlines, priority, whatToDo, manusAdd, manusReply } from './commands';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
@@ -19,6 +19,8 @@ bot.command('dashboard', dashboard());
 bot.command('deadlines', deadlines());
 bot.command('priority', priority());
 bot.command('dowhat', whatToDo());
+bot.command('manusadd', manusAdd());
+bot.command('manusreply', manusReply());
 
 // Handle unknown commands
 bot.on('text', (ctx) => {
