@@ -210,4 +210,188 @@ export class CompetitionService {
 
     return message;
   }
+
+  async generateWhatToDoRecommendations(): Promise<string> {
+    const competitions = await this.getCompetitions();
+    const today = new Date();
+    
+    // Categorize competitions for analysis
+    const urgentDeadlines = competitions.filter(comp => {
+      if (!comp.application_deadline) return false;
+      const deadline = new Date(comp.application_deadline);
+      const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const status = comp.status.toLowerCase();
+      return daysUntil <= 3 && daysUntil >= 0 && 
+             ['research', 'preparing'].some(keyword => status.includes(keyword));
+    });
+
+    const thisWeekDeadlines = competitions.filter(comp => {
+      if (!comp.application_deadline) return false;
+      const deadline = new Date(comp.application_deadline);
+      const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      const status = comp.status.toLowerCase();
+      return daysUntil <= 7 && daysUntil > 3 && 
+             ['research', 'preparing'].some(keyword => status.includes(keyword));
+    });
+
+    const highPriorityResearch = competitions.filter(comp => {
+      const priority = comp.priority_level.toLowerCase();
+      const status = comp.status.toLowerCase();
+      return priority.includes('🔥 high') && status.includes('research');
+    });
+
+    const readyToApply = competitions.filter(comp => {
+      const status = comp.status.toLowerCase();
+      return status.includes('preparing');
+    });
+
+    const highValueOpportunities = competitions.filter(comp => {
+      const status = comp.status.toLowerCase();
+      return comp.prize_amount >= 50000 && 
+             ['research', 'preparing'].some(keyword => status.includes(keyword));
+    });
+
+    // Generate smart recommendations
+    let message = "🎯 **WHAT TO DO NEXT** 🎯\n\n";
+    message += `📊 Analyzed ${competitions.length} competitions in your pipeline\n\n`;
+
+    // Priority 1: Urgent deadlines
+    if (urgentDeadlines.length > 0) {
+      message += "🚨 **URGENT - DO TODAY/TOMORROW**\n";
+      urgentDeadlines.sort((a, b) => {
+        const deadlineA = new Date(a.application_deadline!);
+        const deadlineB = new Date(b.application_deadline!);
+        return deadlineA.getTime() - deadlineB.getTime();
+      });
+
+      for (const comp of urgentDeadlines.slice(0, 3)) {
+        const deadline = new Date(comp.application_deadline!);
+        const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        const urgencyText = daysUntil === 0 ? "DUE TODAY!" : 
+                           daysUntil === 1 ? "DUE TOMORROW!" : 
+                           `${daysUntil} days left`;
+        
+        message += `🔥 **${comp.name}**\n`;
+        message += `   ⏰ ${urgencyText} | 💰 ${this.formatPrize(comp.prize_amount)}\n`;
+        message += `   📋 Status: ${comp.status}\n\n`;
+      }
+    }
+
+    // Priority 2: This week deadlines
+    if (thisWeekDeadlines.length > 0) {
+      message += "⏰ **THIS WEEK'S FOCUS**\n";
+      thisWeekDeadlines.sort((a, b) => {
+        const deadlineA = new Date(a.application_deadline!);
+        const deadlineB = new Date(b.application_deadline!);
+        return deadlineA.getTime() - deadlineB.getTime();
+      });
+
+      for (const comp of thisWeekDeadlines.slice(0, 3)) {
+        const deadline = new Date(comp.application_deadline!);
+        const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        message += `📅 **${comp.name}** - ${daysUntil} days left\n`;
+        message += `   💰 ${this.formatPrize(comp.prize_amount)} | 📊 ${comp.status}\n\n`;
+      }
+    }
+
+    // Priority 3: Ready to apply
+    if (readyToApply.length > 0) {
+      message += "✅ **READY TO SUBMIT**\n";
+      const sortedReady = readyToApply.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
+      
+      for (const comp of sortedReady.slice(0, 2)) {
+        message += `🚀 **${comp.name}**\n`;
+        message += `   💰 ${this.formatPrize(comp.prize_amount)}\n`;
+        if (comp.application_deadline) {
+          const deadline = new Date(comp.application_deadline);
+          const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          message += `   ⏰ ${daysUntil} days until deadline\n`;
+        }
+        message += "\n";
+      }
+    }
+
+    // Priority 4: High-priority research
+    if (highPriorityResearch.length > 0) {
+      message += "🔍 **HIGH-PRIORITY RESEARCH**\n";
+      const sortedResearch = highPriorityResearch.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
+      
+      for (const comp of sortedResearch.slice(0, 2)) {
+        message += `🔥 **${comp.name}**\n`;
+        message += `   💰 ${this.formatPrize(comp.prize_amount)}\n`;
+        if (comp.application_deadline) {
+          const deadline = new Date(comp.application_deadline);
+          const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          message += `   ⏰ ${daysUntil} days to research and prepare\n`;
+        }
+        message += "\n";
+      }
+    }
+
+    // High-value opportunities highlight
+    if (highValueOpportunities.length > 0) {
+      message += "💎 **HIGH-VALUE OPPORTUNITIES**\n";
+      const topValue = highValueOpportunities.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
+      
+      for (const comp of topValue.slice(0, 2)) {
+        message += `💰 **${comp.name}** - ${this.formatPrize(comp.prize_amount)}\n`;
+        message += `   📊 ${comp.status}\n`;
+        if (comp.application_deadline) {
+          const deadline = new Date(comp.application_deadline);
+          const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          message += `   ⏰ ${daysUntil} days left\n`;
+        }
+        message += "\n";
+      }
+    }
+
+    // Smart recommendations based on analysis
+    message += "💡 **SMART RECOMMENDATIONS**\n";
+    
+    if (urgentDeadlines.length > 0) {
+      message += `• 🚨 **IMMEDIATE ACTION**: Focus on ${urgentDeadlines.length} urgent deadline${urgentDeadlines.length > 1 ? 's' : ''}\n`;
+    }
+    
+    if (readyToApply.length > 0) {
+      message += `• ✅ **QUICK WINS**: Submit ${readyToApply.length} application${readyToApply.length > 1 ? 's' : ''} that are ready\n`;
+    }
+    
+    if (highPriorityResearch.length > 0) {
+      message += `• 🔍 **RESEARCH TIME**: Dedicate time to ${highPriorityResearch.length} high-priority research item${highPriorityResearch.length > 1 ? 's' : ''}\n`;
+    }
+
+    const totalPotentialValue = competitions
+      .filter(comp => ['research', 'preparing'].some(keyword => comp.status.toLowerCase().includes(keyword)))
+      .reduce((sum, comp) => sum + (comp.prize_amount || 0), 0);
+
+    message += `\n🎯 **POTENTIAL VALUE**: $${totalPotentialValue.toLocaleString()} in active opportunities\n\n`;
+
+    // Action plan
+    if (urgentDeadlines.length === 0 && thisWeekDeadlines.length === 0 && readyToApply.length === 0) {
+      message += "🌟 **You're caught up on urgent items!** Focus on research and long-term preparation.\n\n";
+    } else {
+      message += "⚡ **ACTION PLAN**:\n";
+      if (urgentDeadlines.length > 0) {
+        message += "1. Complete urgent applications first\n";
+      }
+      if (readyToApply.length > 0) {
+        message += "2. Submit ready applications\n";
+      }
+      if (thisWeekDeadlines.length > 0) {
+        message += "3. Prepare for this week's deadlines\n";
+      }
+      message += "\n";
+    }
+
+    message += "🚀 **Stay focused and maximize your opportunities!**\n";
+    message += "_Powered by Hyphn PA Bot_";
+
+    return message;
+  }
+
+  private formatPrize(amount: number): string {
+    if (amount <= 0) return "No monetary prize";
+    return `$${amount.toLocaleString()}`;
+  }
 }

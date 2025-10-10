@@ -13,6 +13,7 @@ Your personal assistant for competition tracking and opportunities.
 /dashboard - View complete competition dashboard
 /deadlines - Check upcoming deadlines
 /priority - Show high-priority competitions
+/what-to-do - Get smart recommendations on what to focus on next
 /help - Show this help message
 
 I'll help you stay on top of all your competition opportunities! 🚀
@@ -29,6 +30,7 @@ export const help = () => (ctx: Context) => {
 /dashboard - Complete competition dashboard
 /deadlines - Upcoming deadlines (next 7 days)
 /priority - High-priority competitions
+/what-to-do - Get smart recommendations on what to focus on next
 /help - Show this help message
 
 **What I do:**
@@ -119,5 +121,23 @@ export const priority = () => async (ctx: Context) => {
   } catch (error) {
     console.error('Error checking priority competitions:', error);
     return ctx.reply('❌ Sorry, I encountered an error checking priority competitions. Please try again later.');
+  }
+};
+
+
+export const whatToDo = () => async (ctx: Context) => {
+  try {
+    await ctx.reply('🤔 Analyzing your competitions and generating smart recommendations...', { parse_mode: 'Markdown' });
+    
+    const competitionService = new CompetitionService(NOTION_DATA_SOURCE_ID);
+    const recommendations = await competitionService.generateWhatToDoRecommendations();
+    
+    return ctx.reply(recommendations, { 
+      parse_mode: 'Markdown',
+      link_preview_options: { is_disabled: true }
+    });
+  } catch (error) {
+    console.error('Error generating what-to-do recommendations:', error);
+    return ctx.reply('❌ Sorry, I encountered an error generating recommendations. Please try again later.');
   }
 };
