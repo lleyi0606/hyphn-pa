@@ -18,7 +18,7 @@ bot.command('help', help());
 bot.command('dashboard', dashboard());
 bot.command('deadlines', deadlines());
 bot.command('priority', priority());
-bot.command('what-to-do', whatToDo());
+bot.command('dowhat', whatToDo());
 
 // Handle unknown commands
 bot.on('text', (ctx) => {

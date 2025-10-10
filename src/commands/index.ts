@@ -13,7 +13,7 @@ Your personal assistant for competition tracking and opportunities.
 /dashboard - View complete competition dashboard
 /deadlines - Check upcoming deadlines
 /priority - Show high-priority competitions
-/what-to-do - Get smart recommendations on what to focus on next
+/dowhat - Get smart recommendations on what to focus on next
 /help - Show this help message
 
 I'll help you stay on top of all your competition opportunities! 🚀
@@ -30,7 +30,7 @@ export const help = () => (ctx: Context) => {
 /dashboard - Complete competition dashboard
 /deadlines - Upcoming deadlines (next 7 days)
 /priority - High-priority competitions
-/what-to-do - Get smart recommendations on what to focus on next
+/dowhat - Get smart recommendations on what to focus on next
 /help - Show this help message
 
 **What I do:**
