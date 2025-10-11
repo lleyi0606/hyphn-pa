@@ -73,7 +73,7 @@ After adding the competition to the database, please provide a summary of what w
     return await this.createTask({
       prompt,
       mode: 'quality',
-      connectors: ['notion'],
+      connectors: [], // Will be configured later when Notion connector is properly set up
       hide_in_task_list: false,
       create_shareable_link: false
     });
