@@ -1,11 +1,10 @@
 import { Competition } from '../types/competition';
 export declare class NotionService {
     private dataSourceId;
+    private manusApiKey;
+    private baseUrl;
     constructor(dataSourceId: string);
-    private callNotionMCP;
-    private extractPropertiesFromPage;
-    private parseNotionDate;
-    private parseMultiSelect;
+    private createManusTask;
     loadCompetitions(): Promise<Competition[]>;
 }
 //# sourceMappingURL=notion.d.ts.map
