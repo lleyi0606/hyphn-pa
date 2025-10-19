@@ -55,7 +55,7 @@ export class ManusService {
     }
   }
 
-  async createCompetitionExtractionTask(competitionInfo: string): Promise<ManusTaskResponse> {
+  async createCompetitionExtractionTask(competitionInfo: string, attachments?: Array<{filename?: string; url?: string; mimeType?: string; fileData?: string}>): Promise<ManusTaskResponse> {
     const prompt = `For the following competitionInfo: ${competitionInfo}
 
 I want you to extract the necessary details and populate my Hyphn Competitions database table in Notion.
@@ -82,6 +82,7 @@ After adding the competition to the database, please provide a summary of what w
 
     return await this.createTask({
       prompt,
+      attachments,
       taskMode: 'agent',
       connectors: ['9c27c684-2f4f-4d33-8fcf-51664ea15c00'], // notion
       hideInTaskList: true,

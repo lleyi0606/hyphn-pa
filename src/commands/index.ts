@@ -151,18 +151,48 @@ export const whatToDo = () => async (ctx: Context) => {
 export const manusAdd = () => async (ctx: Context) => {
   try {
     const message = ctx.message;
-    if (!message || !('text' in message)) {
-      return ctx.reply('❌ Please provide competition information after the command.\n\nExample: `/manusadd https://example.com/competition` or `/manusadd Competition details here...`');
+    if (!message) {
+      return ctx.reply('❌ Please provide competition information after the command.\n\nExample: `/manusadd https://example.com/competition` or send an image with `/manusadd`');
     }
 
-    const text = message.text;
-    const commandMatch = text.match(/^\/manusadd\s+(.+)$/s);
-    
-    if (!commandMatch || !commandMatch[1].trim()) {
-      return ctx.reply('❌ Please provide competition information after the command.\n\nExample: `/manusadd https://example.com/competition` or `/manusadd Competition details here...`');
-    }
+    let competitionInfo = '';
+    let attachments: Array<{filename?: string; url?: string; mimeType?: string; fileData?: string}> = [];
 
-    const competitionInfo = commandMatch[1].trim();
+    // Handle text messages
+    if ('text' in message) {
+      const text = message.text;
+      const commandMatch = text.match(/^\/manusadd\s+(.+)$/s);
+      
+      if (!commandMatch || !commandMatch[1].trim()) {
+        return ctx.reply('❌ Please provide competition information after the command.\n\nExample: `/manusadd https://example.com/competition` or send an image with `/manusadd`');
+      }
+      
+      competitionInfo = commandMatch[1].trim();
+    }
+    // Handle photo messages
+    else if ('photo' in message) {
+      const caption = message.caption || '';
+      const commandMatch = caption.match(/^\/manusadd\s*(.*)$/s);
+      
+      if (!commandMatch) {
+        return ctx.reply('❌ Please use `/manusadd` command with your image.\n\nExample: Send an image with caption `/manusadd add this competition`');
+      }
+      
+      competitionInfo = commandMatch[1].trim() || 'Please extract competition details from this image';
+      
+      // Get the largest photo
+      const photo = message.photo[message.photo.length - 1];
+      const fileLink = await ctx.telegram.getFileLink(photo.file_id);
+      
+      attachments.push({
+        filename: `competition_image_${photo.file_id}.jpg`,
+        url: fileLink.href,
+        mimeType: 'image/jpeg'
+      });
+    }
+    else {
+      return ctx.reply('❌ Please provide competition information as text or send an image.\n\nExample: `/manusadd https://example.com/competition` or send an image with `/manusadd`');
+    }
     
     await ctx.reply('🤖 **Processing competition information with Manus AI...**\n\nI\'m extracting details and adding them to your Notion database. This may take a moment...', { parse_mode: 'Markdown' });
 
@@ -175,7 +205,7 @@ export const manusAdd = () => async (ctx: Context) => {
     const { sessionStorage } = await import('../services/session');
     
     const manusService = new ManusService(manusApiKey);
-    const taskResponse = await manusService.createCompetitionExtractionTask(competitionInfo);
+    const taskResponse = await manusService.createCompetitionExtractionTask(competitionInfo, attachments.length > 0 ? attachments : undefined);
 
     // Store the session for potential replies
     const chatId = ctx.chat?.id;
