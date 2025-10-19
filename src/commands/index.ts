@@ -1,7 +1,7 @@
 import { Context } from 'telegraf';
 import { CompetitionService } from '../services/competition';
 
-const NOTION_DATABASE_ID = process.env.NOTION_DATABASE_ID || '';
+const NOTION_DATA_SOURCE_ID = process.env.NOTION_DATA_SOURCE_ID || '291a59e7-892d-8096-b67e-000b4078788e';
 
 export const start = () => (ctx: Context) => {
   const welcomeMessage = `
@@ -57,7 +57,7 @@ export const dashboard = () => async (ctx: Context) => {
   try {
     await ctx.reply('📊 Generating competition dashboard...', { parse_mode: 'Markdown' });
     
-    const competitionService = new CompetitionService(NOTION_DATABASE_ID);
+    const competitionService = new CompetitionService(NOTION_DATA_SOURCE_ID);
     const dashboardMessage = await competitionService.generateDashboard();
     
     return ctx.reply(dashboardMessage, { 
@@ -74,7 +74,7 @@ export const deadlines = () => async (ctx: Context) => {
   try {
     await ctx.reply('⏰ Checking upcoming deadlines...', { parse_mode: 'Markdown' });
     
-    const competitionService = new CompetitionService(NOTION_DATABASE_ID);
+    const competitionService = new CompetitionService(NOTION_DATA_SOURCE_ID);
     const upcomingCompetitions = await competitionService.getUpcomingDeadlines(7);
     
     if (upcomingCompetitions.length === 0) {
@@ -105,7 +105,7 @@ export const priority = () => async (ctx: Context) => {
   try {
     await ctx.reply('🔥 Checking high-priority competitions...', { parse_mode: 'Markdown' });
     
-    const competitionService = new CompetitionService(NOTION_DATABASE_ID);
+    const competitionService = new CompetitionService(NOTION_DATA_SOURCE_ID);
     const highPriorityCompetitions = await competitionService.getHighPriorityCompetitions();
     
     if (highPriorityCompetitions.length === 0) {
@@ -137,7 +137,7 @@ export const whatToDo = () => async (ctx: Context) => {
   try {
     await ctx.reply('🤔 Analyzing your competitions and generating smart recommendations...', { parse_mode: 'Markdown' });
     
-    const competitionService = new CompetitionService(NOTION_DATABASE_ID);
+    const competitionService = new CompetitionService(NOTION_DATA_SOURCE_ID);
     const recommendations = await competitionService.generateWhatToDoRecommendations();
     
     return ctx.reply(recommendations, { 

@@ -3,10 +3,10 @@ import { Competition } from '../types/competition';
 
 export class NotionService {
   private notion: Client;
-  private databaseId: string;
+  private dataSourceId: string;
 
-  constructor(databaseId: string) {
-    this.databaseId = databaseId;
+  constructor(dataSourceId: string) {
+    this.dataSourceId = dataSourceId;
     
     const notionToken = process.env.NOTION_INTEGRATION_TOKEN;
     if (!notionToken) {
@@ -89,15 +89,12 @@ export class NotionService {
   async loadCompetitions(): Promise<Competition[]> {
     try {
       console.log('📊 Loading competitions from Notion database...');
-      console.log(`🔑 Database ID: ${this.databaseId}`);
+      console.log(`🔑 Data Source ID: ${this.dataSourceId}`);
       
-      // Use the legacy API endpoint since the SDK doesn't support the new data source API yet
-      const response: any = await (this.notion as any).request({
-        path: `databases/${this.databaseId}/query`,
-        method: 'POST',
-        body: {
-          page_size: 100
-        }
+      // Use the new dataSources.query method
+      const response = await this.notion.dataSources.query({
+        data_source_id: this.dataSourceId,
+        page_size: 100
       });
 
       console.log(`📈 Found ${response.results.length} competitions in Notion`);

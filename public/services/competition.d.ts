@@ -1,7 +1,7 @@
 import { Competition } from '../types/competition';
 export declare class CompetitionService {
     private notionService;
-    constructor(notionDatabaseId: string);
+    constructor(notionDataSourceId: string);
     getCompetitions(): Promise<Competition[]>;
     getUpcomingDeadlines(daysAhead?: number): Promise<Competition[]>;
     getHighPriorityCompetitions(): Promise<Competition[]>;

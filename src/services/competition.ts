@@ -4,8 +4,8 @@ import { NotionService } from './notion';
 export class CompetitionService {
   private notionService: NotionService;
 
-  constructor(notionDatabaseId: string) {
-    this.notionService = new NotionService(notionDatabaseId);
+  constructor(notionDataSourceId: string) {
+    this.notionService = new NotionService(notionDataSourceId);
   }
 
   async getCompetitions(): Promise<Competition[]> {

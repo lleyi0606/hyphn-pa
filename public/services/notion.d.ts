@@ -1,8 +1,8 @@
 import { Competition } from '../types/competition';
 export declare class NotionService {
     private notion;
-    private databaseId;
-    constructor(databaseId: string);
+    private dataSourceId;
+    constructor(dataSourceId: string);
     private parseDate;
     private parseMultiSelect;
     private parseSelect;
