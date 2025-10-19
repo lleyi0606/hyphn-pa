@@ -22,6 +22,15 @@ bot.command('dowhat', whatToDo());
 bot.command('manusadd', manusAdd());
 bot.command('manusreply', manusReply());
 
+// Handle photo messages with /manusadd caption
+bot.on('photo', async (ctx) => {
+  const caption = ctx.message.caption || '';
+  if (caption.startsWith('/manusadd')) {
+    // Call the same manusAdd handler
+    return manusAdd()(ctx);
+  }
+});
+
 // Handle unknown commands
 bot.on('text', (ctx) => {
   const text = ctx.message.text;

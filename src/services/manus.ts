@@ -78,6 +78,8 @@ Please extract and add the following information to the database:
 
 If any information is not available in the provided text, please mark it as "Not specified" or leave it empty for optional fields. Set the Status to "Research" by default for new competitions.
 
+If the user attached a link, you MUST use your browser to scan through the website for information.
+
 After adding the competition to the database, please provide a summary of what was added.`;
 
     return await this.createTask({
