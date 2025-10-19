@@ -4,8 +4,8 @@ import { NotionService } from './notion';
 export class CompetitionService {
   private notionService: NotionService;
 
-  constructor(notionDataSourceId: string) {
-    this.notionService = new NotionService(notionDataSourceId);
+  constructor(notionDatabaseId: string) {
+    this.notionService = new NotionService(notionDatabaseId);
   }
 
   async getCompetitions(): Promise<Competition[]> {
@@ -211,6 +211,11 @@ export class CompetitionService {
     return message;
   }
 
+  private formatPrize(amount: number | undefined): string {
+    if (!amount || amount === 0) return "No prize";
+    return `$${amount.toLocaleString()}`;
+  }
+
   async generateWhatToDoRecommendations(): Promise<string> {
     const competitions = await this.getCompetitions();
     const today = new Date();
@@ -295,103 +300,89 @@ export class CompetitionService {
       }
     }
 
-    // Priority 3: Ready to apply
-    if (readyToApply.length > 0) {
-      message += "✅ **READY TO SUBMIT**\n";
-      const sortedReady = readyToApply.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
-      
-      for (const comp of sortedReady.slice(0, 2)) {
-        message += `🚀 **${comp.name}**\n`;
-        message += `   💰 ${this.formatPrize(comp.prize_amount)}\n`;
-        if (comp.application_deadline) {
-          const deadline = new Date(comp.application_deadline);
-          const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-          message += `   ⏰ ${daysUntil} days until deadline\n`;
-        }
-        message += "\n";
-      }
-    }
-
-    // Priority 4: High-priority research
+    // Priority 3: High-priority research opportunities
     if (highPriorityResearch.length > 0) {
       message += "🔍 **HIGH-PRIORITY RESEARCH**\n";
-      const sortedResearch = highPriorityResearch.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
+      message += `${highPriorityResearch.length} high-priority competitions need investigation:\n\n`;
       
-      for (const comp of sortedResearch.slice(0, 2)) {
-        message += `🔥 **${comp.name}**\n`;
-        message += `   💰 ${this.formatPrize(comp.prize_amount)}\n`;
+      for (const comp of highPriorityResearch.slice(0, 3)) {
+        message += `🎯 **${comp.name}**\n`;
+        message += `   💰 ${this.formatPrize(comp.prize_amount)}`;
+        
         if (comp.application_deadline) {
           const deadline = new Date(comp.application_deadline);
           const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-          message += `   ⏰ ${daysUntil} days to research and prepare\n`;
+          message += ` | ⏰ ${daysUntil} days until deadline`;
         }
-        message += "\n";
+        message += `\n\n`;
       }
     }
 
-    // High-value opportunities highlight
+    // Priority 4: Ready to apply
+    if (readyToApply.length > 0) {
+      message += "✅ **READY TO APPLY**\n";
+      message += `${readyToApply.length} competitions are in "Preparing" status:\n\n`;
+      
+      for (const comp of readyToApply.slice(0, 3)) {
+        message += `📝 **${comp.name}**\n`;
+        message += `   💰 ${this.formatPrize(comp.prize_amount)}`;
+        
+        if (comp.application_deadline) {
+          const deadline = new Date(comp.application_deadline);
+          const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          message += ` | ⏰ ${daysUntil} days until deadline`;
+        }
+        message += `\n\n`;
+      }
+    }
+
+    // Priority 5: High-value opportunities
     if (highValueOpportunities.length > 0) {
       message += "💎 **HIGH-VALUE OPPORTUNITIES**\n";
-      const topValue = highValueOpportunities.sort((a, b) => (b.prize_amount || 0) - (a.prize_amount || 0));
+      message += `${highValueOpportunities.length} competitions with prizes ≥ $50,000:\n\n`;
       
-      for (const comp of topValue.slice(0, 2)) {
+      for (const comp of highValueOpportunities.slice(0, 3)) {
         message += `💰 **${comp.name}** - ${this.formatPrize(comp.prize_amount)}\n`;
-        message += `   📊 ${comp.status}\n`;
+        message += `   📊 ${comp.status}`;
+        
         if (comp.application_deadline) {
           const deadline = new Date(comp.application_deadline);
           const daysUntil = Math.ceil((deadline.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-          message += `   ⏰ ${daysUntil} days left\n`;
+          message += ` | ⏰ ${daysUntil} days until deadline`;
         }
-        message += "\n";
+        message += `\n\n`;
       }
     }
 
-    // Smart recommendations based on analysis
-    message += "💡 **SMART RECOMMENDATIONS**\n";
+    // Summary and recommendations
+    message += "📝 **RECOMMENDED ACTIONS**\n";
     
     if (urgentDeadlines.length > 0) {
-      message += `• 🚨 **IMMEDIATE ACTION**: Focus on ${urgentDeadlines.length} urgent deadline${urgentDeadlines.length > 1 ? 's' : ''}\n`;
+      message += `1. 🚨 **IMMEDIATE**: Complete ${urgentDeadlines.length} urgent application(s)\n`;
     }
     
-    if (readyToApply.length > 0) {
-      message += `• ✅ **QUICK WINS**: Submit ${readyToApply.length} application${readyToApply.length > 1 ? 's' : ''} that are ready\n`;
+    if (thisWeekDeadlines.length > 0) {
+      message += `2. ⏰ **THIS WEEK**: Prepare ${thisWeekDeadlines.length} upcoming submission(s)\n`;
     }
     
     if (highPriorityResearch.length > 0) {
-      message += `• 🔍 **RESEARCH TIME**: Dedicate time to ${highPriorityResearch.length} high-priority research item${highPriorityResearch.length > 1 ? 's' : ''}\n`;
+      message += `3. 🔍 **RESEARCH**: Investigate ${highPriorityResearch.length} high-priority opportunity(ies)\n`;
+    }
+    
+    if (readyToApply.length > 0) {
+      message += `4. ✅ **FINALIZE**: Submit ${readyToApply.length} prepared application(s)\n`;
     }
 
-    const totalPotentialValue = competitions
-      .filter(comp => ['research', 'preparing'].some(keyword => comp.status.toLowerCase().includes(keyword)))
-      .reduce((sum, comp) => sum + (comp.prize_amount || 0), 0);
-
-    message += `\n🎯 **POTENTIAL VALUE**: $${totalPotentialValue.toLocaleString()} in active opportunities\n\n`;
-
-    // Action plan
-    if (urgentDeadlines.length === 0 && thisWeekDeadlines.length === 0 && readyToApply.length === 0) {
-      message += "🌟 **You're caught up on urgent items!** Focus on research and long-term preparation.\n\n";
-    } else {
-      message += "⚡ **ACTION PLAN**:\n";
-      if (urgentDeadlines.length > 0) {
-        message += "1. Complete urgent applications first\n";
-      }
-      if (readyToApply.length > 0) {
-        message += "2. Submit ready applications\n";
-      }
-      if (thisWeekDeadlines.length > 0) {
-        message += "3. Prepare for this week's deadlines\n";
-      }
-      message += "\n";
+    if (urgentDeadlines.length === 0 && thisWeekDeadlines.length === 0 && 
+        highPriorityResearch.length === 0 && readyToApply.length === 0) {
+      message += "✨ **Great job!** No urgent actions required at the moment.\n";
+      message += "Consider exploring new competition opportunities or refining existing applications.\n";
     }
 
-    message += "🚀 **Stay focused and maximize your opportunities!**\n";
-    message += "_Powered by Hyphn PA Bot_";
+    message += "\n💡 **Pro tip**: Focus on high-priority and high-value competitions first to maximize your ROI!\n";
+    message += "\n_Powered by Hyphn PA Bot_";
 
     return message;
   }
-
-  private formatPrize(amount: number): string {
-    if (amount <= 0) return "No monetary prize";
-    return `$${amount.toLocaleString()}`;
-  }
 }
+
