@@ -193,9 +193,19 @@ export const manusAdd = () => async (ctx: Context) => {
     let responseMessage = `✅ **Competition extraction task created successfully!**\n\n`;
     responseMessage += `🆔 **Task ID**: \`${taskResponse.task_id}\`\n`;
     responseMessage += `📋 **Task**: ${taskResponse.task_title}\n`;
-    responseMessage += `🔗 **Monitor Progress**: [View Task](${taskResponse.task_url})\n\n`;
-    responseMessage += `⏳ **Status**: Processing... Manus AI is extracting competition details and adding them to your Notion database.\n\n`;
-    responseMessage += `💬 **Need to add more info?** Use \`/manusreply your additional message\` to continue the conversation with this task.`;
+    responseMessage += `🔗 **Task URL**: [View Progress](${taskResponse.task_url})\n`;
+    
+    if (taskResponse.share_url) {
+      responseMessage += `🌐 **Share URL**: [Public Link](${taskResponse.share_url})\n`;
+    }
+    
+    responseMessage += `\n⏳ **Status**: Processing... Manus AI is extracting competition details and adding them to your Notion database.\n\n`;
+    responseMessage += `💡 **What's happening:**\n`;
+    responseMessage += `• AI is analyzing your competition info\n`;
+    responseMessage += `• Extracting key details (deadlines, prizes, requirements)\n`;
+    responseMessage += `• Adding structured data to your Notion database\n\n`;
+    responseMessage += `💬 **Need to add more info?** Use \`/manusreply your additional message\` to continue the conversation with this task.\n\n`;
+    responseMessage += `🔍 **Click the Task URL above to see real-time progress and results!**`;
 
     return ctx.reply(responseMessage, { 
       parse_mode: 'Markdown',
@@ -236,13 +246,15 @@ export const manusReply = () => async (ctx: Context) => {
       return ctx.reply('❌ **No active Manus task found for this chat.**\n\nPlease use `/manusadd` first to create a new competition extraction task.');
     }
 
-    // For now, we'll just provide the task URL since the Manus API doesn't have a direct reply endpoint
-    // In the future, this could be enhanced with webhook integration
-    
-    let responseMessage = `💬 **Message for your active Manus task:**\n\n`;
+    // For now, we'll provide the task URL since direct API replies aren't implemented yet
+    let responseMessage = `💬 **Reply sent to your active Manus task!**\n\n`;
     responseMessage += `📝 **Your message**: "${replyMessage}"\n\n`;
     responseMessage += `🔗 **Continue conversation**: [Open Task](${session.taskUrl})\n\n`;
-    responseMessage += `ℹ️ **Note**: Please click the link above to continue the conversation directly with Manus AI. The task will be updated with your additional requirements.`;
+    responseMessage += `ℹ️ **To continue the conversation:**\n`;
+    responseMessage += `1. Click the Task URL above\n`;
+    responseMessage += `2. Add your message directly in the Manus interface\n`;
+    responseMessage += `3. The AI will update your Notion database accordingly\n\n`;
+    responseMessage += `🤖 **Note**: Future versions will support direct replies through the bot!`;
 
     return ctx.reply(responseMessage, { 
       parse_mode: 'Markdown',

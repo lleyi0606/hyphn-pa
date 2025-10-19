@@ -4,15 +4,23 @@ export interface ManusTaskResponse {
   task_id: string;
   task_title: string;
   task_url: string;
-  shareURL?: string;
+  share_url?: string;
 }
 
 export interface ManusTaskRequest {
   prompt: string;
-  mode: 'speed' | 'quality';
+  attachments?: Array<{
+    filename?: string;
+    url?: string;
+    mimeType?: string;
+    fileData?: string;
+  }>;
+  taskMode: string;
   connectors: string[];
-  hide_in_task_list?: boolean;
-  create_shareable_link?: boolean;
+  hideInTaskList?: boolean;
+  createShareableLink?: boolean;
+  taskId?: string;
+  agentProfile: string;
 }
 
 export class ManusService {
@@ -56,6 +64,8 @@ Please extract and add the following information to the database:
 - Competition Name (title)
 - Application Deadline (date)
 - Prize Amount (number)
+- Participation requirements ** (Minimum number of people in a team, on-site requirements, etc.)
+- Deliverables ** (Pitch deck, video, etc.)
 - Competition Type (multi-select: Startup Competition, Pitch Competition, Hackathon, Innovation Challenge, etc.)
 - Status (select: Research - should be the default for new entries)
 - Priority Level (select: 📋 Low, 📈 Medium, 🔥 High, 🤔 Research)
@@ -72,10 +82,23 @@ After adding the competition to the database, please provide a summary of what w
 
     return await this.createTask({
       prompt,
-      mode: 'quality',
-      connectors: [], // Will be configured later when Notion connector is properly set up
-      hide_in_task_list: false,
-      create_shareable_link: false
+      taskMode: 'chat',
+      connectors: ['9c27c684-2f4f-4d33-8fcf-51664ea15c00'], // notion
+      hideInTaskList: true,
+      createShareableLink: true,
+      agentProfile: 'speed'
+    });
+  }
+
+  async createCompetitionReplyTask(competitionInfo: string, taskId: string): Promise<ManusTaskResponse> {
+    return await this.createTask({
+      prompt: competitionInfo,
+      taskMode: 'chat',
+      connectors: ['9c27c684-2f4f-4d33-8fcf-51664ea15c00'], // notion
+      hideInTaskList: true,
+      createShareableLink: true,
+      taskId: taskId,
+      agentProfile: 'speed'
     });
   }
 }

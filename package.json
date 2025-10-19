@@ -6,11 +6,11 @@
   "author": "Manus AI",
   "homepage": "https://github.com/lleyi0606/hyphn-pa",
   "dependencies": {
+    "@types/node-fetch": "^2.6.11",
     "@vercel/node": "^5.1.16",
     "dotenv-cli": "^8.0.0",
-    "telegraf": "^4.16.3",
     "node-fetch": "^2.7.0",
-    "@types/node-fetch": "^2.6.11"
+    "telegraf": "^4.16.3"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
@@ -30,5 +30,4 @@
     "lint": "tsc --noemit",
     "webhook-check": "node scripts/webhook-health.js"
   }
-
 }
