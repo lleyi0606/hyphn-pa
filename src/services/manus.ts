@@ -82,7 +82,7 @@ After adding the competition to the database, please provide a summary of what w
 
     return await this.createTask({
       prompt,
-      taskMode: 'chat',
+      taskMode: 'agent',
       connectors: ['9c27c684-2f4f-4d33-8fcf-51664ea15c00'], // notion
       hideInTaskList: true,
       createShareableLink: true,
@@ -93,7 +93,7 @@ After adding the competition to the database, please provide a summary of what w
   async createCompetitionReplyTask(competitionInfo: string, taskId: string): Promise<ManusTaskResponse> {
     return await this.createTask({
       prompt: competitionInfo,
-      taskMode: 'chat',
+      taskMode: 'agent',
       connectors: ['9c27c684-2f4f-4d33-8fcf-51664ea15c00'], // notion
       hideInTaskList: true,
       createShareableLink: true,

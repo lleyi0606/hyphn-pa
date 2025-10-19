@@ -21,7 +21,7 @@ async function testNewManusAPI() {
     
     const requestBody = {
       prompt: "Test competition: YC application due next friday, $500K prize",
-      taskMode: "chat",
+      taskMode: "agent",
       connectors: ["9c27c684-2f4f-4d33-8fcf-51664ea15c00"], // notion
       hideInTaskList: true,
       createShareableLink: true,
