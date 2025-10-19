@@ -104,4 +104,22 @@ After adding the competition to the database, please provide a summary of what w
       agentProfile: 'speed'
     });
   }
+
+  async createCalendarTask(userMessage: string, attachments?: Array<{filename?: string; url?: string; mimeType?: string; fileData?: string}>): Promise<ManusTaskResponse> {
+    const prompt = `You may be asked to add an event to the calendar, find a suitable meeting time, check on events, etc. For the following user message, fulfil the user's request: 
+----------
+${userMessage}
+----------
+I want you to use your google calendar connection and check ONLY the Hyphn calendar (calendar id: c462bfddb90a2479518663256a3b5ac425d1bb88bb0658bc620e5d0fb1001c16@group.calendar.google.com). Pay close attention to the time zone. `;
+
+    return await this.createTask({
+      prompt,
+      attachments,
+      taskMode: 'agent',
+      connectors: ['dd5abf31-7ad3-4c0b-9b9a-f0a576645baf'], // google calendar
+      hideInTaskList: true,
+      createShareableLink: true,
+      agentProfile: 'speed'
+    });
+  }
 }

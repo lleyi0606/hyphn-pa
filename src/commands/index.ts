@@ -15,6 +15,7 @@ Your personal assistant for competition tracking and opportunities.
 /priority - Show high-priority competitions
 /dowhat - Get smart recommendations on what to focus on next
 /manusadd - Add competition info to Notion using Manus AI
+/manuscalendar - Manage calendar events using Manus AI
 /manusreply - Reply to active Manus task
 /help - Show this help message
 
@@ -34,6 +35,7 @@ export const help = () => (ctx: Context) => {
 /priority - High-priority competitions
 /dowhat - Get smart recommendations on what to focus on next
 /manusadd - Add competition info to Notion using Manus AI
+/manuscalendar - Manage calendar events using Manus AI
 /manusreply - Reply to active Manus task
 /help - Show this help message
 
@@ -244,6 +246,106 @@ export const manusAdd = () => async (ctx: Context) => {
 
   } catch (error) {
     console.error('Error in manusAdd command:', error);
+    return ctx.reply('❌ Sorry, I encountered an error while processing your request. Please try again later or contact support.');
+  }
+};
+
+export const manusCalendar = () => async (ctx: Context) => {
+  try {
+    const message = ctx.message;
+    if (!message) {
+      return ctx.reply('❌ Please provide calendar information after the command.\n\nExample: `/manuscalendar Schedule a meeting with the team next Tuesday at 2pm`');
+    }
+
+    let calendarInfo = '';
+    let attachments: Array<{filename?: string; url?: string; mimeType?: string; fileData?: string}> = [];
+
+    // Handle text messages
+    if ('text' in message) {
+      const text = message.text;
+      const commandMatch = text.match(/^\/manuscalendar\s+(.+)$/s);
+      
+      if (!commandMatch || !commandMatch[1].trim()) {
+        return ctx.reply('❌ Please provide calendar information after the command.\n\nExample: `/manuscalendar Schedule a meeting with the team next Tuesday at 2pm`');
+      }
+      
+      calendarInfo = commandMatch[1].trim();
+    }
+    // Handle photo messages
+    else if ('photo' in message) {
+      const caption = message.caption || '';
+      const commandMatch = caption.match(/^\/manuscalendar\s*(.*)$/s);
+      
+      if (!commandMatch) {
+        return ctx.reply('❌ Please use `/manuscalendar` command with your image.\n\nExample: Send an image with caption `/manuscalendar add this event`');
+      }
+      
+      calendarInfo = commandMatch[1].trim() || 'Please extract calendar event details from this image';
+      
+      // Get the largest photo
+      const photo = message.photo[message.photo.length - 1];
+      const fileLink = await ctx.telegram.getFileLink(photo.file_id);
+      
+      attachments.push({
+        filename: `calendar_image_${photo.file_id}.jpg`,
+        url: fileLink.href,
+        mimeType: 'image/jpeg'
+      });
+    }
+    else {
+      return ctx.reply('❌ Please provide calendar information as text or send an image.\n\nExample: `/manuscalendar Schedule a meeting with the team next Tuesday at 2pm`');
+    }
+    
+    await ctx.reply('📅 **Processing calendar request with Manus AI...**\n\nI\'m analyzing your request and checking the Hyphn calendar. This may take a moment...', { parse_mode: 'Markdown' });
+
+    const manusApiKey = process.env.MANUS_API_KEY;
+    if (!manusApiKey) {
+      return ctx.reply('❌ Manus API key not configured. Please contact your administrator.');
+    }
+
+    const { ManusService } = await import('../services/manus');
+    const { sessionStorage } = await import('../services/session');
+    
+    const manusService = new ManusService(manusApiKey);
+    const taskResponse = await manusService.createCalendarTask(calendarInfo, attachments.length > 0 ? attachments : undefined);
+
+    // Store the session for potential replies
+    const chatId = ctx.chat?.id;
+    const userId = ctx.from?.id;
+    
+    if (chatId && userId) {
+      sessionStorage.setSession(chatId, {
+        taskId: taskResponse.task_id,
+        taskUrl: taskResponse.task_url,
+        userId,
+        createdAt: new Date()
+      });
+    }
+
+    let responseMessage = `✅ **Calendar task created successfully!**\n\n`;
+    responseMessage += `🆔 **Task ID**: \`${taskResponse.task_id}\`\n`;
+    responseMessage += `📋 **Task**: ${taskResponse.task_title}\n`;
+    responseMessage += `🔗 **Task URL**: [View Progress](${taskResponse.task_url})\n`;
+    
+    if (taskResponse.share_url) {
+      responseMessage += `🌐 **Share URL**: [Public Link](${taskResponse.share_url})\n`;
+    }
+    
+    responseMessage += `\n⏳ **Status**: Processing... Manus AI is handling your calendar request.\n\n`;
+    responseMessage += `💡 **What's happening:**\n`;
+    responseMessage += `• AI is analyzing your calendar request\n`;
+    responseMessage += `• Checking the Hyphn calendar for availability\n`;
+    responseMessage += `• Managing events and scheduling as needed\n\n`;
+    responseMessage += `💬 **Need to add more info?** Use \`/manusreply your additional message\` to continue the conversation with this task.\n\n`;
+    responseMessage += `🔍 **Click the Task URL above to see real-time progress and results!**`;
+
+    return ctx.reply(responseMessage, { 
+      parse_mode: 'Markdown',
+      link_preview_options: { is_disabled: true }
+    });
+
+  } catch (error) {
+    console.error('Error in manusCalendar command:', error);
     return ctx.reply('❌ Sorry, I encountered an error while processing your request. Please try again later or contact support.');
   }
 };
