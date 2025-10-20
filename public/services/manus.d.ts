@@ -31,5 +31,11 @@ export declare class ManusService {
         fileData?: string;
     }>): Promise<ManusTaskResponse>;
     createCompetitionReplyTask(competitionInfo: string, taskId: string): Promise<ManusTaskResponse>;
+    createCalendarTask(userMessage: string, attachments?: Array<{
+        filename?: string;
+        url?: string;
+        mimeType?: string;
+        fileData?: string;
+    }>): Promise<ManusTaskResponse>;
 }
 //# sourceMappingURL=manus.d.ts.map

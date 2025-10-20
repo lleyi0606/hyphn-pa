@@ -36,22 +36,29 @@ bot.on('photo', async (ctx) => {
   }
 });
 
-// Handle unknown commands
+// Handle unknown commands - only respond to commands or in private chats
 bot.on('text', (ctx) => {
   const text = ctx.message.text;
+  const isPrivateChat = ctx.chat?.type === 'private';
+  const isCommand = text.startsWith('/');
   
-  if (text.startsWith('/')) {
+  // Only respond to commands or in private chats
+  if (isCommand) {
     return ctx.reply(
       '❓ Unknown command. Use /help to see available commands.',
       { parse_mode: 'Markdown' }
     );
   }
   
-  // Handle general messages
-  return ctx.reply(
-    '👋 Hello! I\'m your Hyphn PA Bot. Use /help to see what I can do for you!',
-    { parse_mode: 'Markdown' }
-  );
+  // In private chats, provide a helpful message
+  if (isPrivateChat) {
+    return ctx.reply(
+      '👋 Hello! I\'m your Hyphn PA Bot. Use /help to see what I can do for you!',
+      { parse_mode: 'Markdown' }
+    );
+  }
+  
+  // In groups, ignore non-command messages (don't reply)
 });
 
 // Production mode (Vercel)
