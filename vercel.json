@@ -1,12 +1,21 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
   "builds": [
     {
       "src": "api/index.ts",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/cron-dowhat.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/api/cron-dowhat",
+      "dest": "/api/cron-dowhat.ts"
+    },
     {
       "src": "/api",
       "dest": "/api/index.ts"
@@ -15,5 +24,12 @@
       "src": "/(.*)",
       "dest": "/api/index.ts"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-dowhat",
+      "schedule": "0 0 * * *"
+    }
   ]
 }
+
