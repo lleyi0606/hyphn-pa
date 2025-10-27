@@ -1,7 +1,7 @@
 import { Telegraf } from 'telegraf';
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { development, production } from './core';
-import { start, help, dashboard, deadlines, priority, whatToDo, manusAdd, manusCalendar, manusReply } from './commands';
+import { start, help, dashboard, deadlines, priority, whatToDo, manusAdd, manusCalendar, manusReply, chatId } from './commands';
 
 const BOT_TOKEN = process.env.BOT_TOKEN || '';
 const ENVIRONMENT = process.env.NODE_ENV || '';
@@ -22,6 +22,7 @@ bot.command('dowhat', whatToDo());
 bot.command('manusadd', manusAdd());
 bot.command('manuscalendar', manusCalendar());
 bot.command('manusreply', manusReply());
+bot.command('chatid', chatId());
 
 // Handle photo messages with /manusadd or /manuscalendar caption
 bot.on('photo', async (ctx) => {

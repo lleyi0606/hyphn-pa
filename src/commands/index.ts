@@ -17,6 +17,7 @@ Your personal assistant for competition tracking and opportunities.
 /manusadd - Add competition info to Notion using Manus AI
 /manuscalendar - Manage calendar events using Manus AI
 /manusreply - Reply to active Manus task
+/chatid - Get the current chat ID
 /help - Show this help message
 
 I'll help you stay on top of all your competition opportunities! 🚀
@@ -37,6 +38,7 @@ export const help = () => (ctx: Context) => {
 /manusadd - Add competition info to Notion using Manus AI
 /manuscalendar - Manage calendar events using Manus AI
 /manusreply - Reply to active Manus task
+/chatid - Get the current chat ID
 /help - Show this help message
 
 **What I do:**
@@ -398,3 +400,24 @@ export const manusReply = () => async (ctx: Context) => {
     return ctx.reply('❌ Sorry, I encountered an error while processing your reply. Please try again later.');
   }
 };
+
+
+
+export const chatId = () => (ctx: Context) => {
+  const chatId = ctx.chat?.id;
+  const chatType = ctx.chat?.type;
+  const chatTitle = 'title' in (ctx.chat || {}) ? (ctx.chat as any).title : 'N/A';
+  
+  let message = `🆔 **Chat Information**\n\n`;
+  message += `**Chat ID**: \`${chatId}\`\n`;
+  message += `**Chat Type**: ${chatType}\n`;
+  
+  if (chatType !== 'private') {
+    message += `**Chat Title**: ${chatTitle}\n`;
+  }
+  
+  message += `\n💡 **Tip**: Copy the Chat ID above to use it for scheduling automated messages!`;
+  
+  return ctx.reply(message, { parse_mode: 'Markdown' });
+};
+
